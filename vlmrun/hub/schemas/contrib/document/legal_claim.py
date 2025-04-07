@@ -1,229 +1,58 @@
-from datetime import date
-from decimal import Decimal
-from enum import Enum
-from typing import Optional, List
 from pydantic import BaseModel, Field
-
+from typing import Optional, Literal, List
 
 class Address(BaseModel):
-    """
-    Address model for both claimant and defendant addresses.
-    """
-    building_and_street: Optional[str] = Field(
-        None, 
-        description="Building name/number and street"
-    )
-    second_line: Optional[str] = Field(
-        None, 
-        description="Second line of address (e.g., Apartment/Suite)"
-    )
-    town_or_city: Optional[str] = Field(
-        None, 
-        description="Town or city"
-    )
-    county: Optional[str] = Field(
-        None, 
-        description="County (optional)"
-    )
-    postcode: Optional[str] = Field(
-        None, 
-        description="Postal code"
-    )
+    building_street: Optional[str] = Field(default=None, description="The building and street portion of the address.")
+    # second_line: Optional[str] = Field(default=None, description="Second line of the address, if applicable (e.g., suite or flat number).")
+    town_city: Optional[str] = Field(default=None, description="The town or city of the address.")
+    county_state: Optional[str] = Field(default=None, description="The county or state of the address, if provided.")
+    postcode_zip: Optional[str] = Field(default=None, description="The postcode or ZIP code of the address.")
 
-
-class CourtInfo(BaseModel):
-    """
-    Information about the court and case reference.
-    """
-    court_name: Optional[str] = Field(
-        None, 
-        description="Name of the court (e.g., 'Cambridge County Court')"
-    )
-    fee_account_no: Optional[str] = Field(
-        None, 
-        description="Fee account number, if applicable"
-    )
-    help_with_fees_ref: Optional[str] = Field(
-        None, 
-        description="Help with fees reference number"
-    )
-    claim_number: Optional[str] = Field(
-        None, 
-        description="Court-assigned claim number"
-    )
-    issue_date: Optional[date] = Field(
-        None, 
-        description="Date the claim was issued"
-    )
-
+class Party(BaseModel):
+    name: Optional[str] = Field(default=None, description="The full name of the claimant or defendant.")
+    address: Optional[Address] = Field(default=None, description="The address of the party.")
+    phone: Optional[str] = Field(default=None, description="The phone number of the party.")
+    email: Optional[str] = Field(default=None, description="The email address of the party, if provided.")
 
 class FinancialDetails(BaseModel):
-    """
-    Financial details of the claim.
-    """
-    amount_claimed: Optional[Decimal] = Field(
-        None, 
-        description="Amount being claimed by the claimant"
-    )
-    court_fee: Optional[Decimal] = Field(
-        None, 
-        description="Court fee required for filing"
-    )
-    legal_representative_costs: Optional[Decimal] = Field(
-        None, 
-        description="Costs of legal representation"
-    )
-    total_amount: Optional[Decimal] = Field(
-        None, 
-        description="Total amount including fees and any other costs"
-    )
-
+    amount_claimed: Optional[float] = Field(default=None, description="The amount claimed in the legal action, in the local currency.")
+    court_fee: Optional[float] = Field(default=None, description="The court filing fee, if applicable.")
+    legal_representative_costs: Optional[float] = Field(default=None, description="Costs associated with legal representation.")
+    total_amount: Optional[float] = Field(default=None, description="The total amount including all fees and costs.")
 
 class VulnerabilityDetails(BaseModel):
-    """
-    Details about vulnerability of parties involved.
-    """
-    is_vulnerable: Optional[bool] = Field(
-        None, 
-        description="Indicates if the claimant or witness has a vulnerability"
-    )
-    vulnerability_details: Optional[str] = Field(
-        None, 
-        description="Details of the vulnerability and any required adjustments"
-    )
-    includes_human_rights_issues: Optional[bool] = Field(
-        None,
-        description="Whether the claim involves issues under the Human Rights Act 1998"
-    )
-
-
-class SignatoryType(str, Enum):
-    """
-    Types of signatories for the claim.
-    """
-    CLAIMANT = "Claimant"
-    LITIGATION_FRIEND = "Litigation friend"
-    LEGAL_REPRESENTATIVE = "Claimant's legal representative"
-
+    is_vulnerable: Optional[bool] = Field(default=None, description="Indicates if the claimant or a witness is vulnerable.")
+    details: Optional[str] = Field(default=None, description="Explanation of the vulnerability and requested accommodations.")
+    human_rights_issues: Optional[bool] = Field(default=None, description="Indicates if the claim involves Human Rights Act issues.")
 
 class SignatureDetails(BaseModel):
-    """
-    Details about the signature and declaration.
-    """
-    signatory_type: Optional[List[SignatoryType]] = Field(
-        None, 
-        description="Type(s) of person signing (e.g., Claimant, Legal Rep)"
-    )
-    signature_date: Optional[date] = Field(
-        None, 
-        description="Date of signature"
-    )
-    full_name: Optional[str] = Field(
-        None, 
-        description="Full name of the signatory"
-    )
-    legal_firm_name: Optional[str] = Field(
-        None, 
-        description="Name of the legal firm (if signed by a representative)"
-    )
-    position_held: Optional[str] = Field(
-        None, 
-        description="Position held if signing on behalf of a firm/organization"
-    )
-
+    signatory_type: Optional[Literal["claimant", "litigation_friend", "legal_representative"]] = Field(default=None, description="The type of person signing the form.")
+    date: Optional[str] = Field(default=None, description="The date the form was signed, in any format present.")
+    full_name: Optional[str] = Field(default=None, description="The full name of the signatory.")
+    legal_firm: Optional[str] = Field(default=None, description="The name of the legal firm, if signed by a representative.")
+    position: Optional[str] = Field(default=None, description="The position or title of the signatory, if applicable.")
 
 class ContactDetails(BaseModel):
-    """
-    Contact details for correspondence.
-    """
-    phone_number: Optional[str] = Field(
-        None, 
-        description="Contact phone number"
-    )
-    dx_number: Optional[str] = Field(
-        None, 
-        description="DX (Document Exchange) number"
-    )
-    reference: Optional[str] = Field(
-        None, 
-        description="Internal reference number"
-    )
-    email: Optional[str] = Field(
-        None, 
-        description="Contact email address"
-    )
+    phone: Optional[str] = Field(default=None, description="Contact phone number for correspondence.")
+    dx_number: Optional[str] = Field(default=None, description="Document exchange number, if applicable.")
+    reference: Optional[str] = Field(default=None, description="Reference number for correspondence.")
+    email: Optional[str] = Field(default=None, description="Contact email address for correspondence.")
 
-
+# Main schema for legal claim forms
 class LegalClaim(BaseModel):
-    """
-    Main schema for a legal claim form, allowing None for all fields.
-    """
-    # Court Information
-    court_info: Optional[CourtInfo] = Field(
-        None, 
-        description="Court and case reference information"
-    )
-
-    # Claimant Details
-    claimant_name: Optional[str] = Field(
-        None, 
-        description="Full name of the claimant"
-    )
-    claimant_address: Optional[Address] = Field(
-        None, 
-        description="Claimant's address"
-    )
-
-    # Defendant Details
-    defendant_name: Optional[str] = Field(
-        None, 
-        description="Full name of the defendant"
-    )
-    defendant_address: Optional[Address] = Field(
-        None, 
-        description="Defendant's address"
-    )
-
-    # Claim Details
-    brief_details: Optional[str] = Field(
-        None, 
-        description="Brief overview of the claim"
-    )
-    claim_value: Optional[Decimal] = Field(
-        None, 
-        description="Monetary value of the claim"
-    )
-    claim_particulars: Optional[str] = Field(
-        None, 
-        description="Detailed particulars of the claim"
-    )
-    particulars_status: Optional[str] = Field(
-        None, 
-        description="Status of particulars (e.g., 'attached', 'to follow')"
-    )
-
-    # Additional Information
-    hearing_centre: Optional[str] = Field(
-        None, 
-        description="Preferred County Court Hearing Centre"
-    )
-    vulnerability: Optional[VulnerabilityDetails] = Field(
-        None, 
-        description="Vulnerability and human rights details"
-    )
-
-    # Financial Information
-    financial_details: Optional[FinancialDetails] = Field(
-        None, 
-        description="Breakdown of financial amounts and fees"
-    )
-
-    # Signature and Contact
-    signature: Optional[SignatureDetails] = Field(
-        None, 
-        description="Signature and declaration details"
-    )
-    contact_details: Optional[ContactDetails] = Field(
-        None, 
-        description="Contact details for further correspondence"
-    )
+    court_name: Optional[str] = Field(default=None, description="The name of the court handling the claim (e.g., Cambridge County Court).")
+    # fee_account_number: Optional[str] = Field(default=None, description="The fee account number associated with the claim.")
+    # help_with_fees_reference: Optional[str] = Field(default=None, description="Reference number for help with fees, if applicable.")
+    claim_number: Optional[str] = Field(default=None, description="The unique claim number assigned by the court or entity.")
+    # Parties involved in the claim
+    claimant: Optional[List[Party]] = Field(default=None, description="Details of the claimant(s) filing the claim.")
+    defendant: Optional[List[Party]] = Field(default=None, description="Details of the defendant(s) being sued.")
+    brief_details_of_claim: Optional[str] = Field(default=None, description="A brief description of the claim (e.g., breach of contract, damages).")
+    claim_value: Optional[float] = Field(default=None, description="The monetary value of the claim, if specified separately from financial details.")
+    financial_details: Optional[FinancialDetails] = Field(default=None, description="Breakdown of financial amounts related to the claim.")
+    preferred_hearing_centre: Optional[str] = Field(default=None, description="The preferred county court hearing centre for hearings.")
+    vulnerability_details: Optional[VulnerabilityDetails] = Field(default=None, description="Details about vulnerability considerations.")
+    particulars_of_claim: Optional[str] = Field(default=None, description="Detailed particulars of the claim, if provided or attached.")
+    particulars_status: Optional[Literal["attached", "to_follow"]] = Field(default=None, description="Status of the particulars of claim document.")
+    signature_details: Optional[SignatureDetails] = Field(default=None, description="Details of the signature on the claim form.")
+    contact_details: Optional[ContactDetails] = Field(default=None, description="Contact information for correspondence with the court or entity.")
